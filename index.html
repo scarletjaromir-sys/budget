@@ -5,20 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget JAF - Mickaël</title>
     <style>
-        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1a202c; --accent: #f6e05e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1a202c; --accent: #f6e05e; --red: #feb7b7; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
         .container { max-width: 600px; margin: auto; background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h1 { text-align: center; font-size: 1.4em; margin-bottom: 5px; outline: none; }
-        .info { text-align: center; font-size: 0.75em; color: #48bb78; margin-bottom: 20px; font-weight: bold; }
-
-        .section { margin-bottom: 15px; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; position: relative; }
-        .header { display: flex; flex-direction: column; margin-bottom: 10px; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; }
-        .header-stats { font-size: 0.75em; font-weight: bold; color: #4a5568; margin-top: 4px; opacity: 0.8; }
         
-        h4 { margin: 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; outline: none; }
+        .sync-bar { display: flex; gap: 8px; margin-bottom: 15px; }
+        .btn-sync { flex: 1; padding: 10px; font-size: 0.75em; cursor: pointer; border: 1px solid #cbd5e0; border-radius: 6px; background: white; font-weight: bold; }
 
-        /* Couleurs */
+        .section { margin-bottom: 12px; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .header { padding: 12px; cursor: pointer; position: relative; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-stats { font-size: 0.75em; font-weight: bold; margin-top: 4px; opacity: 0.8; }
+        
+        h4 { margin: 0; font-size: 0.85em; text-transform: uppercase; outline: none; }
+        .toggle-icon { font-size: 0.8em; margin-right: 10px; transition: 0.3s; }
+        
+        .rows { padding: 12px; background: white; border-top: 1px solid #edf2f7; }
+        .hidden { display: none; }
+        .rotate { transform: rotate(90deg); }
+
         .cat-0 { border-left: 8px solid #48bb78; background: #f0fff4; }
         .cat-1 { border-left: 8px solid #4299e1; background: #ebf8ff; }
         .cat-2 { border-left: 8px solid #f56565; background: #fff5f5; }
@@ -26,15 +31,16 @@
 
         .row { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
         .label { flex: 1; font-size: 0.9em; outline: none; }
-        input { width: 90px; padding: 6px; border: 1px solid #cbd5e0; border-radius: 5px; text-align: right; font-weight: bold; }
+        input { width: 85px; padding: 6px; border: 1px solid #cbd5e0; border-radius: 5px; text-align: right; font-weight: bold; }
 
         .add-row { background: #2d3748; color: white; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
-        .del { background: none; border: none; color: #cbd5e0; cursor: pointer; font-size: 1.2em; }
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-main { flex: 2; padding: 12px; background: #2d3748; color: white; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-sec { flex: 1; background: #edf2f7; border-radius: 8px; border: none; cursor: pointer; font-size: 0.8em; }
+        .del { background: none; color: #cbd5e0; border: none; cursor: pointer; font-size: 1.2em; }
 
-        .result-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; }
+        .summary-box { margin-top: 20px; padding: 15px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
+        .summary-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; font-weight: 600; }
+        .val-total-exp { color: #e53e3e; }
+
+        .result-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-top: 15px; }
         .big-total { font-size: 2.5em; font-weight: 800; color: var(--accent); }
     </style>
 </head>
@@ -42,13 +48,26 @@
 
 <div class="container">
     <h1 contenteditable="true" id="app-title">📊 Budget Mensuel Mickaël</h1>
-    <div class="info">✓ Sauvegarde automatique locale</div>
+    
+    <div class="sync-bar">
+        <button class="btn-sync" onclick="exportData()">📤 Sauvegarder fichier</button>
+        <button class="btn-sync" onclick="document.getElementById('fileIn').click()">📥 Charger sur Tablette</button>
+        <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
+    </div>
 
     <div id="main-container"></div>
 
-    <div class="btn-group">
-        <button class="btn-main" onclick="addSection()">➕ AJOUTER CATÉGORIE</button>
-        <button class="btn-sec" onclick="resetApp()">🗑️ RESET</button>
+    <button onclick="addSection()" style="width:100%; padding:12px; background:#2d3748; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">➕ AJOUTER UNE CATÉGORIE</button>
+
+    <div class="summary-box">
+        <div class="summary-line">
+            <span>TOTAL REVENUS :</span>
+            <span id="sum-rev">0.00 €</span>
+        </div>
+        <div class="summary-line">
+            <span>DÉPENSES TOTALES FIXES :</span>
+            <span id="sum-exp" class="val-total-exp">0.00 €</span>
+        </div>
     </div>
 
     <div class="result-card">
@@ -59,7 +78,7 @@
 
 <script>
     window.onload = () => {
-        const saved = localStorage.getItem('budget_jaf_v2');
+        const saved = localStorage.getItem('budget_jaf_final_v3');
         if (saved) {
             document.getElementById('main-container').innerHTML = saved;
             rebind();
@@ -70,52 +89,54 @@
         calc();
     };
 
-    function calc() {
-        let totalRev = 0;
-        let totalExp = 0;
+    function toggle(header) {
+        const rows = header.nextElementSibling;
+        const icon = header.querySelector('.toggle-icon');
+        rows.classList.toggle('hidden');
+        icon.classList.toggle('rotate');
+        save();
+    }
 
-        // Calculer le revenu total d'abord pour les pourcentages
+    function calc() {
+        let totalRev = 0; let totalExp = 0;
         document.querySelectorAll('.val-rev').forEach(i => totalRev += parseFloat(i.value) || 0);
 
-        // Parcourir chaque section pour calculer son total interne
         document.querySelectorAll('.section').forEach(sec => {
             let secTotal = 0;
-            const type = sec.classList.contains('rev-sec') ? '.val-rev' : '.val-exp';
+            const isRev = sec.classList.contains('rev-sec');
+            const mode = isRev ? '.val-rev' : '.val-exp';
+            sec.querySelectorAll(mode).forEach(input => secTotal += parseFloat(input.value) || 0);
+            if (!isRev) totalExp += secTotal;
             
-            sec.querySelectorAll(type).forEach(input => {
-                secTotal += parseFloat(input.value) || 0;
-            });
-
-            if (type === '.val-exp') totalExp += secTotal;
-
-            // Mise à jour de l'affichage du total de section et %
-            const stats = sec.querySelector('.header-stats');
             const percent = totalRev > 0 ? ((secTotal / totalRev) * 100).toFixed(1) : 0;
-            stats.innerText = `Sous-total : ${secTotal.toFixed(2)} € | ${percent}% du budget`;
+            sec.querySelector('.header-stats').innerText = `Sous-total : ${secTotal.toFixed(2)} € | ${percent}%`;
         });
 
+        document.getElementById('sum-rev').innerText = totalRev.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+        document.getElementById('sum-exp').innerText = "- " + totalExp.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
         document.getElementById('total').innerText = (totalRev - totalExp).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
-        localStorage.setItem('budget_jaf_v2', document.getElementById('main-container').innerHTML);
+        save();
     }
+
+    function save() { localStorage.setItem('budget_jaf_final_v3', document.getElementById('main-container').innerHTML); }
 
     function addSection(name = "NOUVELLE CATÉGORIE", mode = "exp") {
         const id = 's-' + Date.now();
         const colorClass = 'cat-' + (document.querySelectorAll('.section').length % 4);
-        const secTypeClass = mode === "rev" ? "rev-sec" : "exp-sec";
         const div = document.createElement('div');
-        div.className = `section ${colorClass} ${secTypeClass}`;
+        div.className = `section ${colorClass} ${mode === "rev" ? "rev-sec" : "exp-sec"}`;
         div.id = id;
         div.innerHTML = `
-            <div class="header">
+            <div class="header" onclick="toggle(this)">
                 <div class="header-top">
-                    <h4 contenteditable="true" oninput="calc()">${name}</h4>
-                    <button class="add-row" onclick="addRow('${id}', '${mode}')">+</button>
+                    <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">${name}</span></h4>
+                    <button class="add-row" onclick="event.stopPropagation(); addRow('${id}', '${mode}')">+</button>
                 </div>
                 <div class="header-stats">Sous-total : 0.00 € | 0%</div>
             </div>
             <div class="rows">
                 <div class="row">
-                    <span contenteditable="true" class="label" oninput="calc()">Description</span>
+                    <span contenteditable="true" class="label" oninput="calc()">Détail</span>
                     <input type="number" class="val-${mode}" value="0" oninput="calc()">
                     <button class="del" onclick="this.parentElement.remove(); calc();">×</button>
                 </div>
@@ -130,16 +151,33 @@
         row.innerHTML = `<span contenteditable="true" class="label" oninput="calc()">Détail</span>
                          <input type="number" class="val-${mode}" value="0" oninput="calc()">
                          <button class="del" onclick="this.parentElement.remove(); calc();">×</button>`;
-        document.getElementById(sid).querySelector('.rows').appendChild(row);
+        const rowsContainer = document.getElementById(sid).querySelector('.rows');
+        rowsContainer.appendChild(row);
+        rowsContainer.classList.remove('hidden');
         calc();
+    }
+
+    function exportData() {
+        const data = { html: document.getElementById('main-container').innerHTML, title: document.getElementById('app-title').innerText };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'budget-mickael.json'; a.click();
+    }
+
+    function importData(event) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = JSON.parse(e.target.result);
+            document.getElementById('main-container').innerHTML = data.html;
+            document.getElementById('app-title').innerText = data.title;
+            rebind(); calc();
+        };
+        reader.readAsText(event.target.files[0]);
     }
 
     function rebind() {
         document.querySelectorAll('input').forEach(i => i.oninput = calc);
         document.querySelectorAll('[contenteditable]').forEach(e => e.oninput = calc);
     }
-
-    function resetApp() { if(confirm("Effacer tout ?")) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
