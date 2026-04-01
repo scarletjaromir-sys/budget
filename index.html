@@ -5,41 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget JAF - Mickaël</title>
     <style>
-        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1a202c; --accent: #f6e05e; --red: #feb7b7; }
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1a202c; --accent: #f6e05e; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 10px; margin: 0; }
         .container { max-width: 600px; margin: auto; background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        
         .sync-bar { display: flex; gap: 8px; margin-bottom: 15px; }
         .btn-sync { flex: 1; padding: 10px; font-size: 0.75em; cursor: pointer; border: 1px solid #cbd5e0; border-radius: 6px; background: white; font-weight: bold; }
-
         .section { margin-bottom: 12px; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden; }
         .header { padding: 12px; cursor: pointer; position: relative; }
         .header-top { display: flex; justify-content: space-between; align-items: center; }
         .header-stats { font-size: 0.75em; font-weight: bold; margin-top: 4px; opacity: 0.8; }
-        
         h4 { margin: 0; font-size: 0.85em; text-transform: uppercase; outline: none; }
         .toggle-icon { font-size: 0.8em; margin-right: 10px; transition: 0.3s; }
-        
         .rows { padding: 12px; background: white; border-top: 1px solid #edf2f7; }
         .hidden { display: none; }
         .rotate { transform: rotate(90deg); }
-
         .cat-0 { border-left: 8px solid #48bb78; background: #f0fff4; }
         .cat-1 { border-left: 8px solid #4299e1; background: #ebf8ff; }
         .cat-2 { border-left: 8px solid #f56565; background: #fff5f5; }
         .cat-3 { border-left: 8px solid #805ad5; background: #faf5ff; }
-
         .row { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
         .label { flex: 1; font-size: 0.9em; outline: none; }
         input { width: 85px; padding: 6px; border: 1px solid #cbd5e0; border-radius: 5px; text-align: right; font-weight: bold; }
-
         .add-row { background: #2d3748; color: white; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; }
         .del { background: none; color: #cbd5e0; border: none; cursor: pointer; font-size: 1.2em; }
-
         .summary-box { margin-top: 20px; padding: 15px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; font-weight: 600; }
         .val-total-exp { color: #e53e3e; }
-
+        .note-prime { font-size: 0.75em; color: #718096; font-style: italic; margin-top: 5px; border-top: 1px solid #e2e8f0; padding-top: 5px; }
         .result-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-top: 15px; }
         .big-total { font-size: 2.5em; font-weight: 800; color: var(--accent); }
     </style>
@@ -55,19 +47,62 @@
         <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
     </div>
 
-    <div id="main-container"></div>
+    <div id="main-container">
+        <div class="section cat-0 rev-sec" id="s-rev">
+            <div class="header" onclick="toggle(this)">
+                <div class="header-top">
+                    <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">📥 REVENUS</span></h4>
+                    <button class="add-row" onclick="event.stopPropagation(); addRow('s-rev', 'rev')">+</button>
+                </div>
+                <div class="header-stats">Chargement...</div>
+            </div>
+            <div class="rows">
+                <div class="row"><span contenteditable="true" class="label">Salaire Moyen</span><input type="number" class="val-rev" value="2168" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">CAF</span><input type="number" class="val-rev" value="187.22" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+            </div>
+        </div>
 
-    <button onclick="addSection()" style="width:100%; padding:12px; background:#2d3748; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">➕ AJOUTER UNE CATÉGORIE</button>
+        <div class="section cat-1 exp-sec" id="s-log">
+            <div class="header" onclick="toggle(this)">
+                <div class="header-top">
+                    <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">🏠 MAISON & CHARGES</span></h4>
+                    <button class="add-row" onclick="event.stopPropagation(); addRow('s-log', 'exp')">+</button>
+                </div>
+                <div class="header-stats">Chargement...</div>
+            </div>
+            <div class="rows">
+                <div class="row"><span contenteditable="true" class="label">Loyer</span><input type="number" class="val-exp" value="927.54" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Electricité</span><input type="number" class="val-exp" value="55" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Eau</span><input type="number" class="val-exp" value="35" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Régule de charges</span><input type="number" class="val-exp" value="30" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Place de parking</span><input type="number" class="val-exp" value="15" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Assurance habitation</span><input type="number" class="val-exp" value="12" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+            </div>
+        </div>
+
+        <div class="section cat-2 exp-sec" id="s-car">
+            <div class="header" onclick="toggle(this)">
+                <div class="header-top">
+                    <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">🚗 VOITURE / CRÉDITS</span></h4>
+                    <button class="add-row" onclick="event.stopPropagation(); addRow('s-car', 'exp')">+</button>
+                </div>
+                <div class="header-stats">Chargement...</div>
+            </div>
+            <div class="rows">
+                <div class="row"><span contenteditable="true" class="label">LOA</span><input type="number" class="val-exp" value="213" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Assurance Macif</span><input type="number" class="val-exp" value="55" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Recharge électrique</span><input type="number" class="val-exp" value="45" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Crédit 3000€ (1er loyer)</span><input type="number" class="val-exp" value="30" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="addSection()" style="width:100%; padding:12px; background:#2d3748; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;">➕ AJOUTER CATÉGORIE VIDE</button>
 
     <div class="summary-box">
-        <div class="summary-line">
-            <span>TOTAL REVENUS :</span>
-            <span id="sum-rev">0.00 €</span>
-        </div>
-        <div class="summary-line">
-            <span>DÉPENSES TOTALES FIXES :</span>
-            <span id="sum-exp" class="val-total-exp">0.00 €</span>
-        </div>
+        <div class="summary-line"><span>TOTAL REVENUS :</span><span id="sum-rev">0.00 €</span></div>
+        <div class="summary-line"><span>DÉPENSES TOTALES :</span><span id="sum-exp" class="val-total-exp">0.00 €</span></div>
+        <div class="note-prime">⚠️ Déficit compensé par prime annuelle de 1700€ (décembre).</div>
     </div>
 
     <div class="result-card">
@@ -78,14 +113,8 @@
 
 <script>
     window.onload = () => {
-        const saved = localStorage.getItem('budget_jaf_final_v3');
-        if (saved) {
-            document.getElementById('main-container').innerHTML = saved;
-            rebind();
-        } else {
-            addSection("📥 REVENUS", "rev");
-            addSection("🏠 MAISON & CHARGES", "exp");
-        }
+        const saved = localStorage.getItem('budget_jaf_v5');
+        if (saved) { document.getElementById('main-container').innerHTML = saved; rebind(); }
         calc();
     };
 
@@ -104,21 +133,22 @@
         document.querySelectorAll('.section').forEach(sec => {
             let secTotal = 0;
             const isRev = sec.classList.contains('rev-sec');
-            const mode = isRev ? '.val-rev' : '.val-exp';
-            sec.querySelectorAll(mode).forEach(input => secTotal += parseFloat(input.value) || 0);
+            const inputClass = isRev ? '.val-rev' : '.val-exp';
+            sec.querySelectorAll(inputClass).forEach(input => secTotal += parseFloat(input.value) || 0);
             if (!isRev) totalExp += secTotal;
-            
             const percent = totalRev > 0 ? ((secTotal / totalRev) * 100).toFixed(1) : 0;
             sec.querySelector('.header-stats').innerText = `Sous-total : ${secTotal.toFixed(2)} € | ${percent}%`;
         });
 
         document.getElementById('sum-rev').innerText = totalRev.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
         document.getElementById('sum-exp').innerText = "- " + totalExp.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
-        document.getElementById('total').innerText = (totalRev - totalExp).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+        const diff = totalRev - totalExp;
+        document.getElementById('total').innerText = diff.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+        document.getElementById('total').style.color = diff < 0 ? "#feb7b7" : "var(--accent)";
         save();
     }
 
-    function save() { localStorage.setItem('budget_jaf_final_v3', document.getElementById('main-container').innerHTML); }
+    function save() { localStorage.setItem('budget_jaf_v5', document.getElementById('main-container').innerHTML); }
 
     function addSection(name = "NOUVELLE CATÉGORIE", mode = "exp") {
         const id = 's-' + Date.now();
@@ -134,13 +164,7 @@
                 </div>
                 <div class="header-stats">Sous-total : 0.00 € | 0%</div>
             </div>
-            <div class="rows">
-                <div class="row">
-                    <span contenteditable="true" class="label" oninput="calc()">Détail</span>
-                    <input type="number" class="val-${mode}" value="0" oninput="calc()">
-                    <button class="del" onclick="this.parentElement.remove(); calc();">×</button>
-                </div>
-            </div>`;
+            <div class="rows"><div class="row"><span contenteditable="true" class="label">Détail</span><input type="number" class="val-${mode}" value="0" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div></div>`;
         document.getElementById('main-container').appendChild(div);
         calc();
     }
@@ -151,9 +175,9 @@
         row.innerHTML = `<span contenteditable="true" class="label" oninput="calc()">Détail</span>
                          <input type="number" class="val-${mode}" value="0" oninput="calc()">
                          <button class="del" onclick="this.parentElement.remove(); calc();">×</button>`;
-        const rowsContainer = document.getElementById(sid).querySelector('.rows');
-        rowsContainer.appendChild(row);
-        rowsContainer.classList.remove('hidden');
+        const rowsCont = document.getElementById(sid).querySelector('.rows');
+        rowsCont.appendChild(row);
+        rowsCont.classList.remove('hidden');
         calc();
     }
 
