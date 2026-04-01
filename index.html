@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur Budget JAF - Mickaël</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --text: #1a202c;
+            --subtext: #718096;
+            --accent: #f6e05e;
+        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
+        .container { max-width: 600px; margin: auto; background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        
+        h1 { text-align: center; font-size: 1.4em; margin-bottom: 5px; outline: none; }
+        .info { text-align: center; font-size: 0.75em; color: #48bb78; margin-bottom: 20px; font-weight: bold; }
+
+        .section { margin-bottom: 15px; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; position: relative; transition: 0.2s; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        h4 { margin: 0; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px; outline: none; flex: 1; }
+
+        /* Couleurs automatiques */
+        .cat-0 { border-left: 8px solid #48bb78; background: #f0fff4; }
+        .cat-1 { border-left: 8px solid #4299e1; background: #ebf8ff; }
+        .cat-2 { border-left: 8px solid #f56565; background: #fff5f5; }
+        .cat-3 { border-left: 8px solid #805ad5; background: #faf5ff; }
+        .cat-4 { border-left: 8px solid #ed8936; background: #fffaf0; }
+        .cat-5 { border-left: 8px solid #718096; background: #f7fafc; }
+
+        .row { display: flex; align-items: center; margin-bottom: 8px; gap: 8px; }
+        .label { flex: 1; font-size: 0.9em; outline: none; padding: 2px; }
+        input { width: 85px; padding: 6px; border: 1px solid #cbd5e0; border-radius: 5px; text-align: right; font-weight: bold; font-size: 1em; }
+
+        .add-row { background: #2d3748; color: white; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: bold; }
+        .del { background: none; border: none; color: #cbd5e0; cursor: pointer; font-size: 1.2em; }
+        .del-sec { position: absolute; top: -8px; right: -8px; background: #e53e3e; color: white; border-radius: 50%; width: 22px; height: 22px; border: none; cursor: pointer; font-size: 14px; display: none; }
+        .section:hover .del-sec { display: block; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-main { flex: 2; padding: 12px; background: #2d3748; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-sec { flex: 1; padding: 12px; background: #edf2f7; color: #4a5568; border: none; border-radius: 8px; cursor: pointer; font-size: 0.8em; }
+
+        .result-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-top: 20px; }
+        .big-total { font-size: 2.5em; font-weight: 800; color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 contenteditable="true" id="app-title">📊 Budget Mensuel Mickaël</h1>
+    <div class="info">✓ Sauvegarde automatique locale</div>
+
+    <div id="main-container">
+        </div>
+
+    <div class="btn-group">
+        <button class="btn-main" onclick="addSection()">➕ AJOUTER UNE CATÉGORIE</button>
+        <button class="btn-sec" onclick="resetApp()">🗑️ RESET</button>
+    </div>
+
+    <div class="result-card">
+        <div style="font-size: 0.9em; opacity: 0.8; margin-bottom: 5px;">RESTE À VIVRE RÉEL</div>
+        <div id="total" class="big-total">0.00 €</div>
+    </div>
+</div>
+
+<script>
+    let colorIdx = 0;
+
+    window.onload = () => {
+        const saved = localStorage.getItem('budget_jaf_data');
+        const savedTitle = localStorage.getItem('budget_jaf_title');
+        
+        if (saved) {
+            document.getElementById('main-container').innerHTML = saved;
+            if(savedTitle) document.getElementById('app-title').innerText = savedTitle;
+            rebind();
+        } else {
+            // Configuration initiale basée sur tes captures
+            addSection("📥 REVENUS", "rev");
+            addSection("🏠 MAISON & CHARGES", "exp");
+            addSection("🚗 VÉHICULE", "exp");
+        }
+        calc();
+    };
+
+    function calc() {
+        let r = 0, e = 0;
+        document.querySelectorAll('.val-rev').forEach(i => r += parseFloat(i.value) || 0);
+        document.querySelectorAll('.val-exp').forEach(i => e += parseFloat(i.value) || 0);
+        document.getElementById('total').innerText = (r - e).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+        
+        // Sauvegarde du contenu et du titre
+        localStorage.setItem('budget_jaf_data', document.getElementById('main-container').innerHTML);
+        localStorage.setItem('budget_jaf_title', document.getElementById('app-title').innerText);
+    }
+
+    function addSection(name = "NOUVELLE CATÉGORIE", mode = "exp") {
+        const id = 's-' + Date.now();
+        const colorClass = 'cat-' + (document.querySelectorAll('.section').length % 6);
+        const div = document.createElement('div');
+        div.className = `section ${colorClass}`;
+        div.id = id;
+        div.innerHTML = `
+            <button class="del-sec" onclick="this.parentElement.remove(); calc();">×</button>
+            <div class="header">
+                <h4 contenteditable="true" oninput="calc()">${name}</h4>
+                <button class="add-row" onclick="addRow('${id}', '${mode}')">+</button>
+            </div>
+            <div class="rows">
+                <div class="row">
+                    <span contenteditable="true" class="label" oninput="calc()">Description</span>
+                    <input type="number" class="val-${mode}" value="0" oninput="calc()">
+                    <button class="del" onclick="this.parentElement.remove(); calc();">×</button>
+                </div>
+            </div>`;
+        document.getElementById('main-container').appendChild(div);
+        calc();
+    }
+
+    function addRow(sid, mode) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.innerHTML = `<span contenteditable="true" class="label" oninput="calc()">Détail</span>
+                         <input type="number" class="val-${mode}" value="0" oninput="calc()">
+                         <button class="del" onclick="this.parentElement.remove(); calc();">×</button>`;
+        document.getElementById(sid).querySelector('.rows').appendChild(row);
+        calc();
+    }
+
+    function rebind() {
+        // Re-lier les événements après un chargement LocalStorage
+        document.querySelectorAll('input').forEach(i => i.oninput = calc);
+        document.querySelectorAll('[contenteditable]').forEach(e => e.oninput = calc);
+    }
+
+    function resetApp() {
+        if(confirm("Effacer toutes les données ?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+</script>
+
+</body>
+</html>
