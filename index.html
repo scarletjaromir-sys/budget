@@ -31,7 +31,6 @@
         .summary-box { margin-top: 20px; padding: 15px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; }
         .summary-line { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95em; font-weight: 600; }
         .val-total-exp { color: #e53e3e; }
-        .note-prime { font-size: 0.75em; color: #718096; font-style: italic; margin-top: 5px; border-top: 1px solid #e2e8f0; padding-top: 5px; }
         .result-card { background: #1a202c; color: white; padding: 20px; border-radius: 12px; text-align: center; margin-top: 15px; }
         .big-total { font-size: 2.5em; font-weight: 800; color: var(--accent); }
     </style>
@@ -54,10 +53,10 @@
                     <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">📥 REVENUS</span></h4>
                     <button class="add-row" onclick="event.stopPropagation(); addRow('s-rev', 'rev')">+</button>
                 </div>
-                <div class="header-stats">Chargement...</div>
+                <div class="header-stats">...</div>
             </div>
             <div class="rows">
-                <div class="row"><span contenteditable="true" class="label">Salaire Moyen</span><input type="number" class="val-rev" value="2168" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
+                <div class="row"><span contenteditable="true" class="label">Salaire Moyen (primes incl.)</span><input type="number" class="val-rev" value="2168" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
                 <div class="row"><span contenteditable="true" class="label">CAF</span><input type="number" class="val-rev" value="187.22" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
             </div>
         </div>
@@ -68,7 +67,7 @@
                     <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">🏠 MAISON & CHARGES</span></h4>
                     <button class="add-row" onclick="event.stopPropagation(); addRow('s-log', 'exp')">+</button>
                 </div>
-                <div class="header-stats">Chargement...</div>
+                <div class="header-stats">...</div>
             </div>
             <div class="rows">
                 <div class="row"><span contenteditable="true" class="label">Loyer</span><input type="number" class="val-exp" value="927.54" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
@@ -79,22 +78,6 @@
                 <div class="row"><span contenteditable="true" class="label">Assurance habitation</span><input type="number" class="val-exp" value="12" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
             </div>
         </div>
-
-        <div class="section cat-2 exp-sec" id="s-car">
-            <div class="header" onclick="toggle(this)">
-                <div class="header-top">
-                    <h4><span class="toggle-icon">▶</span> <span contenteditable="true" onclick="event.stopPropagation()">🚗 VOITURE / CRÉDITS</span></h4>
-                    <button class="add-row" onclick="event.stopPropagation(); addRow('s-car', 'exp')">+</button>
-                </div>
-                <div class="header-stats">Chargement...</div>
-            </div>
-            <div class="rows">
-                <div class="row"><span contenteditable="true" class="label">LOA</span><input type="number" class="val-exp" value="213" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
-                <div class="row"><span contenteditable="true" class="label">Assurance Macif</span><input type="number" class="val-exp" value="55" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
-                <div class="row"><span contenteditable="true" class="label">Recharge électrique</span><input type="number" class="val-exp" value="45" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
-                <div class="row"><span contenteditable="true" class="label">Crédit 3000€ (1er loyer)</span><input type="number" class="val-exp" value="30" oninput="calc()"><button class="del" onclick="this.parentElement.remove(); calc();">×</button></div>
-            </div>
-        </div>
     </div>
 
     <button onclick="addSection()" style="width:100%; padding:12px; background:#2d3748; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:10px;">➕ AJOUTER CATÉGORIE VIDE</button>
@@ -102,7 +85,6 @@
     <div class="summary-box">
         <div class="summary-line"><span>TOTAL REVENUS :</span><span id="sum-rev">0.00 €</span></div>
         <div class="summary-line"><span>DÉPENSES TOTALES :</span><span id="sum-exp" class="val-total-exp">0.00 €</span></div>
-        <div class="note-prime">⚠️ Déficit compensé par prime annuelle de 1700€ (décembre).</div>
     </div>
 
     <div class="result-card">
@@ -113,7 +95,7 @@
 
 <script>
     window.onload = () => {
-        const saved = localStorage.getItem('budget_jaf_v5');
+        const saved = localStorage.getItem('budget_jaf_v6');
         if (saved) { document.getElementById('main-container').innerHTML = saved; rebind(); }
         calc();
     };
@@ -148,7 +130,7 @@
         save();
     }
 
-    function save() { localStorage.setItem('budget_jaf_v5', document.getElementById('main-container').innerHTML); }
+    function save() { localStorage.setItem('budget_jaf_v6', document.getElementById('main-container').innerHTML); }
 
     function addSection(name = "NOUVELLE CATÉGORIE", mode = "exp") {
         const id = 's-' + Date.now();
